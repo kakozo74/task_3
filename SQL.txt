@@ -1,0 +1,32 @@
+SELECT Customer.CustomerId, Customer.FirstName, Customer.Phone, Customer.Company
+FROM Customer
+JOIN Invoice on Invoice.CustomerId = Customer.CustomerId
+JOIN InvoiceLine on Invoice.InvoiceId = InvoiceLine.InvoiceId
+JOIN Track on InvoiceLine.TrackId = Track.TrackId
+JOIN Genre on Track.GenreId = Genre.GenreId
+JOIN Employee on Customer.SupportRepId = Employee.EmployeeId
+WHERE 
+strftime('%Y-%m-%d', Employee.BirthDate) <= strftime('%Y-%m-%d', '1969-05-19')
+AND
+Genre.Name != 'Rock'
+GROUP by Customer.FirstName HAVING count(*) > 1
+ORDER by Customer.City ASC, Customer.Email DESC
+LIMIT 10
+_______________________________________________________________
+SELECT s.LastName || ' ' || s.FirstName as WorkerName, s.Phone, 
+r.LastName || ' ' || r.FirstName as HeadName, r.Phone
+FROM Employee as r
+LEFT JOIN Employee as s on r.EmployeeId = s.ReportsTo
+WHERE s.ReportsTo is NOT NULL
+_______________________________________________________________
+SELECT Customer.FirstName, Customer.Phone
+FROM Customer
+JOIN Invoice on Invoice.CustomerId = Customer.CustomerId
+JOIN InvoiceLine as I on Invoice.InvoiceId = I.InvoiceId
+JOIN (SELECT UnitPrice, InvoiceLineId
+FROM InvoiceLine
+ORDER by UnitPrice DESC
+LIMIT 1) as MaxPrice 
+on I.UnitPrice = MaxPrice.UnitPrice
+GROUP by Customer.FirstName HAVING count(*) > 1
+ORDER by Customer.FirstName ASC
