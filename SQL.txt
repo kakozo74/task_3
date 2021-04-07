@@ -30,3 +30,14 @@ LIMIT 1) as MaxPrice
 on I.UnitPrice = MaxPrice.UnitPrice
 GROUP by Customer.FirstName HAVING count(*) > 1
 ORDER by Customer.FirstName ASC
+_______________________________________________________________
+SELECT DISTINCT Customer.FirstName || Customer.LastName as full_name, Customer.Phone, Customer.City FROM Customer
+INNER JOIN Invoice on Invoice.CustomerId=Customer.CustomerId
+WHERE City in (SELECT Customer.City FROM Customer GROUP BY City HAVING COUNT(City)>1)
+_______________________________________________________________
+SELECT BillingCity FROM Invoice GROUP BY BillingCity ORDER by sum(total) DESC limit 3
+_______________________________________________________________
+SELECT DISTINCT Genre.Name, Track.Name, Album.Title, Artist.Name FROM Track
+INNER JOIN Genre on Track.GenreId=(SELECT Genre.GenreId WHERE Genre.Name=(SELECT Genre.Name FROM Track LEFT JOIN InvoiceLine on InvoiceLine.TrackId=Track.TrackId LEFT JOIN Genre on Genre.GenreId=Track.GenreId GROUP BY Genre.Name ORDER by count() DESC LIMIT 1))
+INNER JOIN Album on Album.AlbumId=Track.AlbumId
+INNER JOIN Artist on Artist.ArtistId=Album.ArtistId
